@@ -1,10 +1,13 @@
+const CACHE_STATIC = 'static-v3';
+const CACHE_DYNAMIC = 'dynamic-v1';
+
 // Fired when the browser installs the service worker
 self.addEventListener('install', event => {
   // console.log('[Service Worker] Installing Service Worker...', event);
   // Earliest time to cache assets
   // Must wait until everything is cached before finishing up the installation
   event.waitUntil(
-    caches.open('static').then(cache => {
+    caches.open(CACHE_STATIC).then(cache => {
       console.log('[Service Worker] Precaching the app shell');
       // cache.add('/');
       // cache.add('/index.html');
@@ -37,6 +40,20 @@ self.addEventListener('install', event => {
 // Shut down all tabs where app is running and re-open them. Just saw that Ctrl+F5 works as well.
 self.addEventListener('activate', event => {
   // console.log('[Service Worker] Activating Service Worker...', event);
+
+  event.waitUntil(
+    caches.keys().then(cacheKeyList => {
+      return Promise.all(
+        cacheKeyList.map(cacheKey => {
+          if (cacheKey !== CACHE_STATIC && cacheKey !== CACHE_DYNAMIC) {
+            console.log('[Service Worker] Removing old cache:', cacheKey);
+            return caches.delete(cacheKey);
+          }
+        })
+      );
+    })
+  );
+
   return self.clients.claim();
 });
 
@@ -54,7 +71,7 @@ self.addEventListener('fetch', event => {
       } else {
         return fetch(event.request)
           .then(fetchResponse => {
-            return caches.open('dynamic').then(cache => {
+            return caches.open(CACHE_DYNAMIC).then(cache => {
               // Can only consume a response once so need to clone it in order to also return it
               cache.put(event.request.url, fetchResponse.clone());
               return fetchResponse;
