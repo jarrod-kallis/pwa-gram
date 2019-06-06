@@ -22,49 +22,49 @@ window.addEventListener('beforeinstallprompt', event => {
   return false;
 });
 
-(async function() {
-  try {
-    const response = await fetch('https://httpbin.org/ip');
-    console.log(response);
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-    } else {
-      throw new Error(response.statusText);
-    }
-  } catch (error) {
-    console.error(error);
-  }
-})();
+// (async function() {
+//   try {
+//     const response = await fetch('https://httpbin.org/ip');
+//     console.log(response);
+//     if (response.ok) {
+//       const data = await response.json();
+//       console.log(data);
+//     } else {
+//       throw new Error(response.statusText);
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
+// })();
 
-(async function() {
-  try {
-    const response = await fetch('https://httpbin.org/post', {
-      method: 'POST',
-      // headers: {
-      //   'Content-Type': 'application/json',
-      //   Accept: 'application/json'
-      // },
-      mode: 'cors', // 'no-cors'
-      body: JSON.stringify({ message: 'hi' })
-    });
-    console.log(response);
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-    } else {
-      throw new Error(response.statusText);
-    }
-  } catch (error) {
-    console.error(error);
-  }
-})();
+// (async function() {
+//   try {
+//     const response = await fetch('https://httpbin.org/post', {
+//       method: 'POST',
+//       // headers: {
+//       //   'Content-Type': 'application/json',
+//       //   Accept: 'application/json'
+//       // },
+//       mode: 'cors', // 'no-cors'
+//       body: JSON.stringify({ message: 'hi' })
+//     });
+//     console.log(response);
+//     if (response.ok) {
+//       const data = await response.json();
+//       console.log(data);
+//     } else {
+//       throw new Error(response.statusText);
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
+// })();
 
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://httpbin.org/ip');
-xhr.responseType = 'json';
+// var xhr = new XMLHttpRequest();
+// xhr.open('GET', 'https://httpbin.org/ip');
+// xhr.responseType = 'json';
 
-xhr.onload = () => console.log('XHR Response:', xhr.response);
-xhr.onerror = () => console.error('XHR Error:', xhr);
+// xhr.onload = () => console.log('XHR Response:', xhr.response);
+// xhr.onerror = () => console.error('XHR Error:', xhr);
 
-xhr.send();
+// xhr.send();

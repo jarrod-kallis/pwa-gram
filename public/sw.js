@@ -13,9 +13,9 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.url.startsWith('https://httpbin.org')) {
-    console.log('[Service Worker] Fetching something...', event);
-  }
+  // if (event.request.url.startsWith('https://httpbin.org')) {
+  //   console.log('[Service Worker] Fetching something...', event);
+  // }
 
   // event.respondWith(null);
   event.respondWith(fetch(event.request));
