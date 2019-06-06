@@ -1,9 +1,28 @@
 var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
-var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
+var closeCreatePostModalButton = document.querySelector(
+  '#close-create-post-modal-btn'
+);
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
+
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+
+    // Show the banner to add the app to the home screen
+    deferredPrompt.userChoice.then(choice => {
+      console.log(choice.outcome);
+
+      if (choice.outcome === 'dismissed') {
+        console.log('User cancelled installation');
+      } else {
+        console.log('User added app to home screen');
+      }
+    });
+
+    deferredPrompt = null;
+  }
 }
 
 function closeCreatePostModal() {
