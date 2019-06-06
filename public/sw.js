@@ -52,13 +52,15 @@ self.addEventListener('fetch', event => {
       if (response) {
         return response;
       } else {
-        return fetch(event.request).then(fetchResponse => {
-          return caches.open('dynamic').then(cache => {
-            // Can only consume a response once so need to clone it in order to also return it
-            cache.put(event.request.url, fetchResponse.clone());
-            return fetchResponse;
-          });
-        });
+        return fetch(event.request)
+          .then(fetchResponse => {
+            return caches.open('dynamic').then(cache => {
+              // Can only consume a response once so need to clone it in order to also return it
+              cache.put(event.request.url, fetchResponse.clone());
+              return fetchResponse;
+            });
+          })
+          .catch(error => error);
       }
     })
   );
