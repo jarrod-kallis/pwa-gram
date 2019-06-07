@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'static-v6';
-const CACHE_DYNAMIC = 'dynamic-v2';
+const CACHE_STATIC = 'static-v11';
+const CACHE_DYNAMIC = 'dynamic-v7';
 
 // Fired when the browser installs the service worker
 self.addEventListener('install', event => {
@@ -58,6 +58,7 @@ self.addEventListener('activate', event => {
   return self.clients.claim();
 });
 
+// Cache with Network fallback strategy
 self.addEventListener('fetch', event => {
   // if (event.request.url.startsWith('https://httpbin.org')) {
   //   console.log('[Service Worker] Fetching something...', event);
@@ -78,7 +79,7 @@ self.addEventListener('fetch', event => {
               return fetchResponse;
             });
           })
-          .catch(error =>
+          .catch(() =>
             caches
               .open(CACHE_STATIC)
               .then(cache => cache.match('/offline.html'))
@@ -87,3 +88,37 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// Cache only strategy
+// self.addEventListener('fetch', event => {
+//   event.respondWith(caches.match(event.request));
+// });
+
+// Network only strategy
+// self.addEventListener('fetch', event => {
+//   event.respondWith(fetch(event.request));
+// });
+
+// Network with cache fallback strategy
+// self.addEventListener('fetch', event => {
+//   event.respondWith(
+//     fetch(event.request)
+//       .then(fetchResponse => {
+//         return caches.open(CACHE_DYNAMIC).then(cache => {
+//           cache.put(event.request.url, fetchResponse.clone());
+//           return fetchResponse;
+//         });
+//       })
+//       .catch(() => {
+//         return caches.match(event.request).then(response => {
+//           if (response) {
+//             return response;
+//           } else {
+//             return caches
+//               .open(CACHE_STATIC)
+//               .then(cache => cache.match('/offline.html'));
+//           }
+//         });
+//       })
+//   );
+// });
