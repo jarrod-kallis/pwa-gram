@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'static-v11';
-const CACHE_DYNAMIC = 'dynamic-v7';
+const CACHE_STATIC = 'static-v12';
+const CACHE_DYNAMIC = 'dynamic-v8';
 
 // Fired when the browser installs the service worker
 self.addEventListener('install', event => {
@@ -58,36 +58,48 @@ self.addEventListener('activate', event => {
   return self.clients.claim();
 });
 
-// Cache with Network fallback strategy
+// Network & cache strategy
 self.addEventListener('fetch', event => {
-  // if (event.request.url.startsWith('https://httpbin.org')) {
-  //   console.log('[Service Worker] Fetching something...', event);
-  // }
-
-  // event.respondWith(null);
-  // event.respondWith(fetch(event.request));
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) {
+    caches.open(CACHE_DYNAMIC).then(cache => {
+      return fetch(event.request).then(response => {
+        cache.put(event.request, response.clone());
         return response;
-      } else {
-        return fetch(event.request)
-          .then(fetchResponse => {
-            return caches.open(CACHE_DYNAMIC).then(cache => {
-              // Can only consume a response once so need to clone it in order to also return it
-              cache.put(event.request.url, fetchResponse.clone());
-              return fetchResponse;
-            });
-          })
-          .catch(() =>
-            caches
-              .open(CACHE_STATIC)
-              .then(cache => cache.match('/offline.html'))
-          );
-      }
+      });
     })
   );
 });
+
+// Cache with Network fallback strategy
+// self.addEventListener('fetch', event => {
+//   // if (event.request.url.startsWith('https://httpbin.org')) {
+//   //   console.log('[Service Worker] Fetching something...', event);
+//   // }
+
+//   // event.respondWith(null);
+//   // event.respondWith(fetch(event.request));
+//   event.respondWith(
+//     caches.match(event.request).then(response => {
+//       if (response) {
+//         return response;
+//       } else {
+//         return fetch(event.request)
+//           .then(fetchResponse => {
+//             return caches.open(CACHE_DYNAMIC).then(cache => {
+//               // Can only consume a response once so need to clone it in order to also return it
+//               cache.put(event.request.url, fetchResponse.clone());
+//               return fetchResponse;
+//             });
+//           })
+//           .catch(() =>
+//             caches
+//               .open(CACHE_STATIC)
+//               .then(cache => cache.match('/offline.html'))
+//           );
+//       }
+//     })
+//   );
+// });
 
 // Cache only strategy
 // self.addEventListener('fetch', event => {
