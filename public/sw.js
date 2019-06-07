@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'static-v3';
-const CACHE_DYNAMIC = 'dynamic-v1';
+const CACHE_STATIC = 'static-v6';
+const CACHE_DYNAMIC = 'dynamic-v2';
 
 // Fired when the browser installs the service worker
 self.addEventListener('install', event => {
@@ -17,6 +17,7 @@ self.addEventListener('install', event => {
       cache.addAll([
         // '/',
         '/index.html',
+        '/offline.html',
         '/src/js/app.js',
         '/src/js/feed.js',
         '/src/js/material.min.js',
@@ -77,7 +78,11 @@ self.addEventListener('fetch', event => {
               return fetchResponse;
             });
           })
-          .catch(error => error);
+          .catch(error =>
+            caches
+              .open(CACHE_STATIC)
+              .then(cache => cache.match('/offline.html'))
+          );
       }
     })
   );
