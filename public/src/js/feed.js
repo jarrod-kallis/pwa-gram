@@ -42,6 +42,13 @@ const onCardSaveButtonClick = event => {
   });
 };
 
+const clearCards = () => {
+  console.log('Clearing cards');
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.firstChild);
+  }
+};
+
 function createCard() {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
@@ -69,10 +76,38 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch('https://httpbin.org/get')
+// Network & cache strategy
+const url = 'https://httpbin.org/get';
+let gotCardFromNetwork = false;
+
+fetch(url)
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
+    console.log('Got card from network');
+    gotCardFromNetwork = true;
+    clearCards();
     createCard();
   });
+
+setTimeout(() => {
+  if ('caches' in window) {
+    caches
+      .match(url)
+      .then(response => {
+        if (response) {
+          return response.json();
+        }
+      })
+      .then(data => {
+        console.log('Got card from cache');
+        if (!gotCardFromNetwork) {
+          clearCards();
+          createCard();
+        } else {
+          console.log('Already got card from network');
+        }
+      });
+  }
+}, 3000);
