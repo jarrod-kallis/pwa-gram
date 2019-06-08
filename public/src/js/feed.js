@@ -24,6 +24,13 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  // Unregister a service worker
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.getRegistrations().then(registrations => {
+  //     registrations.map(registration => registration.unregister());
+  //   });
+  // }
 }
 
 function closeCreatePostModal() {
@@ -49,23 +56,23 @@ const clearCards = () => {
   }
 };
 
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = `url("${data.image}")`;
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color = 'white';
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = 'center';
   // var cardSaveButton = document.createElement('button');
   // cardSaveButton.textContent = 'Save';
@@ -76,8 +83,15 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
+function updateUi(data) {
+  clearCards();
+  data.forEach(data => {
+    createCard(data);
+  });
+}
+
 // Network & cache strategy
-const url = 'https://httpbin.org/get';
+const url = 'https://pwagram-b7912.firebaseio.com/posts.json';
 let gotCardFromNetwork = false;
 
 fetch(url)
@@ -85,29 +99,36 @@ fetch(url)
     return res.json();
   })
   .then(function(data) {
-    console.log('Got card from network');
+    console.log('Got cards from network');
     gotCardFromNetwork = true;
-    clearCards();
-    createCard();
+    const posts = Object.keys(data).map(post => {
+      return data[post];
+    });
+    console.log(posts);
+    updateUi(posts);
   });
 
-setTimeout(() => {
-  if ('caches' in window) {
-    caches
-      .match(url)
-      .then(response => {
-        if (response) {
-          return response.json();
-        }
-      })
-      .then(data => {
-        console.log('Got card from cache');
+// setTimeout(() => {
+if ('caches' in window) {
+  caches
+    .match(url)
+    .then(response => {
+      if (response) {
+        return response.json();
+      }
+    })
+    .then(data => {
+      if (data) {
         if (!gotCardFromNetwork) {
-          clearCards();
-          createCard();
+          console.log('Got cards from cache');
+          const posts = Object.keys(data).map(post => {
+            return data[post];
+          });
+          updateUi(posts);
         } else {
           console.log('Already got card from network');
         }
-      });
-  }
-}, 3000);
+      }
+    });
+}
+// }, 3000);
