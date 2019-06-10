@@ -6,24 +6,25 @@ var closeCreatePostModalButton = document.querySelector(
 var sharedMomentsArea = document.querySelector('#shared-moments');
 
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
+  // createPostArea.style.display = 'block';
+  createPostArea.style.transform = 'translateY(0)';
 
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
+  // if (deferredPrompt) {
+  //   deferredPrompt.prompt();
 
-    // Show the banner to add the app to the home screen
-    deferredPrompt.userChoice.then(choice => {
-      console.log(choice.outcome);
+  //   // Show the banner to add the app to the home screen
+  //   deferredPrompt.userChoice.then(choice => {
+  //     console.log(choice.outcome);
 
-      if (choice.outcome === 'dismissed') {
-        console.log('User cancelled installation');
-      } else {
-        console.log('User added app to home screen');
-      }
-    });
+  //     if (choice.outcome === 'dismissed') {
+  //       console.log('User cancelled installation');
+  //     } else {
+  //       console.log('User added app to home screen');
+  //     }
+  //   });
 
-    deferredPrompt = null;
-  }
+  //   deferredPrompt = null;
+  // }
 
   // Unregister a service worker
   // if ('serviceWorker' in navigator) {
@@ -34,7 +35,8 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  // createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);

@@ -3,12 +3,14 @@
   position: fixed;
   width: 100%;
   min-height: 100vh;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
   bottom: 0;
   top: 56px;
   background: white;
   text-align: center;
-  display: none;
+  /* display: none; */
+  transform: translateY(100vh);
+  transition: transform 0.3s;
 }
 
 .main-image {
