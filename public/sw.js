@@ -1,5 +1,8 @@
-const CACHE_STATIC = 'static-v23';
-const CACHE_DYNAMIC = 'dynamic-v17';
+importScripts('/src/js/idb.js');
+importScripts('/src/js/utils/db.js');
+
+const CACHE_STATIC = 'static-v24';
+const CACHE_DYNAMIC = 'dynamic-v18';
 const MAX_CACHE_ITEMS = 100;
 
 const STATIC_FILES = [
@@ -8,6 +11,7 @@ const STATIC_FILES = [
   '/offline.html',
   '/src/js/app.js',
   '/src/js/feed.js',
+  '/src/js/idb.js',
   '/src/js/material.min.js',
   '/src/css/app.css',
   '/src/css/feed.css',
@@ -88,12 +92,16 @@ self.addEventListener('fetch', event => {
   // Cache & Network strategy
   if (event.request.url.indexOf(url) !== -1) {
     event.respondWith(
-      caches.open(CACHE_DYNAMIC).then(cache => {
-        return fetch(event.request).then(response => {
-          cache.put(event.request, response.clone());
-          trimCache(CACHE_DYNAMIC, MAX_CACHE_ITEMS);
-          return response;
+      fetch(event.request).then(response => {
+        const clonedRes = response.clone();
+        clearData('posts').then(() => {
+          return clonedRes.json().then(data => {
+            Object.keys(data).map(post => {
+              writeData('posts', data[post]);
+            });
+          });
         });
+        return response;
       })
     );
   } else {
@@ -118,7 +126,7 @@ self.addEventListener('fetch', event => {
                   // Fetch doesn't throw an error in this regard, but it does indicate that the response is not okay.
                   // So don't cache something like this.
                   if (
-                    fetchResponse.status != 404 &&
+                    fetchResponse.status !== 404 &&
                     // Stupid chrome-extension
                     event.request.url.indexOf('chrome-extension') === -1
                   ) {

@@ -63,7 +63,8 @@ function createCard(data) {
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = `url("${data.image}")`;
   cardTitle.style.backgroundSize = 'cover';
-  cardTitle.style.height = '180px';
+  cardTitle.style.backgroundPosition = 'center';
+  // cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color = 'white';
@@ -109,26 +110,36 @@ fetch(url)
   });
 
 // setTimeout(() => {
-if ('caches' in window) {
-  caches
-    .match(url)
-    .then(response => {
-      if (response) {
-        return response.json();
-      }
-    })
-    .then(data => {
-      if (data) {
-        if (!gotCardFromNetwork) {
-          console.log('Got cards from cache');
-          const posts = Object.keys(data).map(post => {
-            return data[post];
-          });
-          updateUi(posts);
-        } else {
-          console.log('Already got card from network');
-        }
-      }
-    });
+if ('indexedDB' in window) {
+  readData('posts').then(data => {
+    if (!gotCardFromNetwork) {
+      console.log('Got cards from cache:', data);
+      updateUi(data);
+    } else {
+      console.log('Already got card from network');
+    }
+  });
 }
+// if ('caches' in window) {
+//   caches
+//     .match(url)
+//     .then(response => {
+//       if (response) {
+//         return response.json();
+//       }
+//     })
+//     .then(data => {
+//       if (data) {
+//         if (!gotCardFromNetwork) {
+//           console.log('Got cards from cache');
+//           const posts = Object.keys(data).map(post => {
+//             return data[post];
+//           });
+//           updateUi(posts);
+//         } else {
+//           console.log('Already got card from network');
+//         }
+//       }
+//     });
+// }
 // }, 3000);
