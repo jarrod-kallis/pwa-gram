@@ -1,13 +1,16 @@
-const dbPromise = idb.open('posts-store', 1, db => {
+const dbPromise = idb.open('posts-store', 2, db => {
   if (!db.objectStoreNames.contains('posts')) {
     // Table & primary key
     db.createObjectStore('posts', { keyPath: 'id' });
+  }
+  if (!db.objectStoreNames.contains('sync-posts')) {
+    db.createObjectStore('sync-posts', { keyPath: 'id' });
   }
 });
 
 function writeData(table, data) {
   return dbPromise.then(db => {
-    console.log('trying to store:', data);
+    // console.log('trying to store:', data);
     const tx = db.transaction(table, 'readwrite');
     const store = tx.objectStore(table);
     store.put(data);

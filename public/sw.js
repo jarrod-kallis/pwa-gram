@@ -5,6 +5,8 @@ const CACHE_STATIC = 'static-v25';
 const CACHE_DYNAMIC = 'dynamic-v19';
 const MAX_CACHE_ITEMS = 100;
 
+const POSTS_URL = 'https://pwagram-b7912.firebaseio.com/posts';
+
 const STATIC_FILES = [
   // '/',
   '/index.html',
@@ -87,10 +89,8 @@ self.addEventListener('activate', event => {
 // });
 
 self.addEventListener('fetch', event => {
-  const url = 'https://pwagram-b7912.firebaseio.com/posts';
-
   // Cache & Network strategy
-  if (event.request.url.indexOf(url) !== -1) {
+  if (event.request.url.indexOf(POSTS_URL) !== -1) {
     event.respondWith(
       fetch(event.request).then(response => {
         const clonedRes = response.clone();
@@ -110,7 +110,7 @@ self.addEventListener('fetch', event => {
     );
 
     if (staticFileFound) {
-      console.log('Found static file:', event.request.url);
+      // console.log('Found static file:', event.request.url);
       event.respondWith(caches.match(event.request));
     } else {
       // Cache first with network fallback strategy
@@ -220,3 +220,48 @@ self.addEventListener('fetch', event => {
 //       })
 //   );
 // });
+
+self.addEventListener('sync', event => {
+  console.log('[Service Worker] Background sync:', event);
+
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+
+    event.waitUntil(
+      readData('sync-posts').then(posts => {
+        for (let post of posts) {
+          console.log(post);
+          fetch(POSTS_URL + '.json', {
+            method: 'POST',
+            // headers: {
+            //   'Content-Type': 'application/json',
+            //   Accept: 'application/json'
+            // },
+            body: JSON.stringify({
+              ...post
+            })
+          })
+            .then(response => {
+              console.log(response);
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error(
+                  'Unable to sync post:',
+                  response.status,
+                  response.statusText
+                );
+              }
+            })
+            .then(data => {
+              console.log('Data synchronised:', data);
+              deleteSingleItem('sync-posts', post.id);
+            })
+            .catch(error => {
+              console.log('Error syncing data', error);
+            });
+        }
+      })
+    );
+  }
+});
