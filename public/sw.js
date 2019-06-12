@@ -1,11 +1,13 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils/db.js');
 
-const CACHE_STATIC = 'static-v25';
-const CACHE_DYNAMIC = 'dynamic-v19';
+const CACHE_STATIC = 'static-v28';
+const CACHE_DYNAMIC = 'dynamic-v20';
 const MAX_CACHE_ITEMS = 100;
 
-const POSTS_URL = 'https://pwagram-b7912.firebaseio.com/posts';
+const GET_POSTS_URL = 'https://pwagram-b7912.firebaseio.com/posts';
+const POST_POSTS_URL =
+  'https://us-central1-pwagram-b7912.cloudfunctions.net/storePostData';
 
 const STATIC_FILES = [
   // '/',
@@ -90,7 +92,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   // Cache & Network strategy
-  if (event.request.url.indexOf(POSTS_URL) !== -1) {
+  if (event.request.url.indexOf(GET_POSTS_URL) !== -1) {
     event.respondWith(
       fetch(event.request).then(response => {
         const clonedRes = response.clone();
@@ -231,12 +233,12 @@ self.addEventListener('sync', event => {
       readData('sync-posts').then(posts => {
         for (let post of posts) {
           console.log(post);
-          fetch(POSTS_URL + '.json', {
+          fetch(POST_POSTS_URL, {
             method: 'POST',
-            // headers: {
-            //   'Content-Type': 'application/json',
-            //   Accept: 'application/json'
-            // },
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+            },
             body: JSON.stringify({
               ...post
             })
@@ -255,7 +257,7 @@ self.addEventListener('sync', event => {
             })
             .then(data => {
               console.log('Data synchronised:', data);
-              deleteSingleItem('sync-posts', post.id);
+              deleteSingleItem('sync-posts', data.id); // post.id);
             })
             .catch(error => {
               console.log('Error syncing data', error);

@@ -1,5 +1,6 @@
 // Variable to store the 'banner install' event
 let deferredPrompt;
+const notificationButtons = document.querySelectorAll('.enable-notifications');
 
 if (!window.Promise) {
   window.Promise = Promise;
@@ -21,6 +22,60 @@ window.addEventListener('beforeinstallprompt', event => {
 
   return false;
 });
+
+const displayNotificationConfirmation = () => {
+  if ('serviceWorker' in navigator) {
+    const options = {
+      body: 'You successfully subscribed to our notification service!',
+      icon: '/src/images/icons/app-icon-96x96.png',
+      images: '/src/images/sf-boat.jpg',
+      dir: 'ltr',
+      lang: 'en-US', // Must be 'BCP 47' compliant
+      // Vibration, pause, vibration
+      vibrate: [100, 50, 200],
+      badge: '/src/images/icons/app-icon-96x96.png',
+      tag: 'confirm-notification',
+      renotify: true,
+      actions: [
+        {
+          action: 'confirm',
+          title: 'Okay',
+          icon: '/src/images/icons/app-icon-96x96.png'
+        },
+        {
+          action: 'cancel',
+          title: 'Cancel',
+          icon: '/src/images/icons/app-icon-96x96.png'
+        }
+      ]
+    };
+
+    navigator.serviceWorker.ready.then(reg =>
+      reg.showNotification('Successfully subscribed (from SW)', options)
+    );
+  }
+  // new Notification('Successfully subscribed', options);
+};
+
+const askForNotificationPermission = () => {
+  Notification.requestPermission(result => {
+    console.log('User notification choice:', result);
+
+    if (result === 'granted') {
+      displayNotificationConfirmation();
+    } else {
+      console.log('No notifications for this guy');
+    }
+  });
+};
+
+if ('Notification' in window) {
+  for (let notificationButton of notificationButtons) {
+    // console.log(notificationButton);
+    notificationButton.style.display = 'inline-block';
+    notificationButton.addEventListener('click', askForNotificationPermission);
+  }
+}
 
 // (async function() {
 //   try {

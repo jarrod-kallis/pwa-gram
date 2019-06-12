@@ -98,10 +98,12 @@ function updateUi(data) {
 }
 
 // Network & cache strategy
-const url = 'https://pwagram-b7912.firebaseio.com/posts.json';
+const GET_URL = 'https://pwagram-b7912.firebaseio.com/posts.json';
+const POST_URL =
+  'https://us-central1-pwagram-b7912.cloudfunctions.net/storePostData';
 let gotCardFromNetwork = false;
 
-fetch(url)
+fetch(GET_URL)
   .then(function(res) {
     return res.json();
   })
@@ -151,8 +153,12 @@ if ('indexedDB' in window) {
 // }, 3000);
 
 function sendData(post) {
-  fetch(url, {
+  fetch(POST_URL, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
     body: JSON.stringify({
       ...post
     })
