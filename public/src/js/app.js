@@ -51,10 +51,53 @@ const displayNotificationConfirmation = () => {
     };
 
     navigator.serviceWorker.ready.then(reg =>
-      reg.showNotification('Successfully subscribed (from SW)', options)
+      reg.showNotification('Successfully subscribed', options)
     );
   }
   // new Notification('Successfully subscribed', options);
+};
+
+const configurePushSubscription = () => {
+  navigator.serviceWorker.ready.then(registration =>
+    registration.pushManager
+      .getSubscription()
+      .then(subscription => {
+        if (!subscription) {
+          // Create a new subscription
+          const vapidPublicKey =
+            'BJn3uuGP9D0zjr8IimACunVvr5RPTJsbbWF0XDraEDN1YXfcMEiXpzt--ReYeEGd1sANuM2zHooASS0ieZ-0fTs';
+          const convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+
+          return registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidPublicKey
+          });
+        } else {
+          // We have an existing subscription
+        }
+      })
+      .then(newSubscription => {
+        return fetch(
+          'https://pwagram-b7912.firebaseio.com/subscriptions.json',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+            },
+            body: JSON.stringify(newSubscription)
+          }
+        );
+      })
+      .then(response => {
+        if (response.ok) {
+          displayNotificationConfirmation();
+        }
+      })
+      .catch(error =>
+        console.error('Error creating notification subscription.', error)
+      )
+  );
 };
 
 const askForNotificationPermission = () => {
@@ -62,14 +105,15 @@ const askForNotificationPermission = () => {
     console.log('User notification choice:', result);
 
     if (result === 'granted') {
-      displayNotificationConfirmation();
+      // displayNotificationConfirmation();
+      configurePushSubscription();
     } else {
       console.log('No notifications for this guy');
     }
   });
 };
 
-if ('Notification' in window) {
+if ('Notification' in window && 'serviceWorker' in navigator) {
   for (let notificationButton of notificationButtons) {
     // console.log(notificationButton);
     notificationButton.style.display = 'inline-block';

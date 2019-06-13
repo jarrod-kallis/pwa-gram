@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils/db.js');
 
-const CACHE_STATIC = 'static-v28';
-const CACHE_DYNAMIC = 'dynamic-v20';
+const CACHE_STATIC = 'static-v44';
+const CACHE_DYNAMIC = 'dynamic-v21';
 const MAX_CACHE_ITEMS = 100;
 
 const GET_POSTS_URL = 'https://pwagram-b7912.firebaseio.com/posts';
@@ -130,7 +130,8 @@ self.addEventListener('fetch', event => {
                   if (
                     fetchResponse.status !== 404 &&
                     // Stupid chrome-extension
-                    event.request.url.indexOf('chrome-extension') === -1
+                    event.request.url.indexOf('chrome-extension') === -1 &&
+                    event.request.method !== 'POST'
                   ) {
                     // Can only consume a response once so need to clone it in order to also return it
                     cache.put(event.request, fetchResponse.clone());
@@ -266,4 +267,60 @@ self.addEventListener('sync', event => {
       })
     );
   }
+});
+
+self.addEventListener('notificationclick', event => {
+  const notification = event.notification;
+  const action = event.action;
+
+  console.log('Notification:', notification);
+
+  if (action === 'confirm') {
+    console.log('Confirm was chosen');
+    notification.close();
+  } else {
+    console.log('Action:', action);
+    event.waitUntil(
+      clients.matchAll().then(clientList => {
+        console.log('Clients:', clientList);
+        // const client = clientList.find(client => {
+        //   return client.visibilityState === 'visible';
+        // });
+
+        // console.log('Found client:', client);
+        if (clientList.length > 0) {
+          clientList[0].navigate(notification.data.url);
+          clientList[0].focus();
+        } else {
+          clients.openWindow(notification.data.url);
+        }
+        notification.close();
+      })
+    );
+  }
+});
+
+// User swiped the notification away/clicked the X (basically didn't want to interact with it at all)
+self.addEventListener('notificationclose', event => {
+  console.log('Notification was closed.', event);
+});
+
+self.addEventListener('push', event => {
+  console.log('Push notification received.', event);
+
+  let data = { title: 'New!', content: 'Something new happened', openUrl: '/' };
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  const options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.openUrl
+    }
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title, options));
 });

@@ -9,9 +9,77 @@ var titleElement = document.querySelector('#title');
 var locationElement = document.querySelector('#location');
 var snackbarElement = document.querySelector('#confirmation-toast');
 
+var videoPlayer = document.querySelector('#player');
+var canvas = document.querySelector('#canvas');
+var captureButton = document.querySelector('#capture-btn');
+var imagePicker = document.querySelector('#image-picker');
+var imagePickerDiv = document.querySelector('#pick-image');
+let picture = null;
+
+function initialiseMedia() {
+  if (!('mediaDevices' in navigator)) {
+    navigator.mediaDevices = {};
+  }
+
+  if (!('getUserMedia' in navigator.mediaDevices)) {
+    navigator.mediaDevices.getUserMedia = constraints => {
+      const getUserMedia =
+        navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+      if (!getUserMedia) {
+        return Promise.reject(new Error('getUserMedia is not implemented.'));
+      }
+
+      return new Promise((resolve, reject) => {
+        getUserMedia.call(navigator, constraints, resolve, reject);
+      });
+    };
+  }
+
+  navigator.mediaDevices
+    .getUserMedia({
+      video: true,
+      audio: false
+    })
+    .then(stream => {
+      videoPlayer.srcObject = stream;
+      videoPlayer.style.display = 'block';
+    })
+    .catch(() => {
+      imagePickerDiv.style.display = 'block';
+    });
+}
+
+captureButton.addEventListener('click', event => {
+  event.preventDefault();
+
+  canvas.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+
+  const context = canvas.getContext('2d');
+  context.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
+  // context.drawImage(
+  //   videoPlayer,
+  //   0,
+  //   0,
+  //   canvas.width,
+  //   videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width)
+  // );
+
+  // console.log(videoPlayer.videoHeight, videoPlayer.videoWidth, canvas.width);
+
+  videoPlayer.srcObject.getVideoTracks().forEach(track => {
+    track.stop();
+  });
+
+  picture = dataURItoBlob(canvas.toDataURL());
+});
+
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
   createPostArea.style.transform = 'translateY(0)';
+  initialiseMedia();
 
   // if (deferredPrompt) {
   //   deferredPrompt.prompt();
@@ -41,6 +109,9 @@ function openCreatePostModal() {
 function closeCreatePostModal() {
   // createPostArea.style.display = 'none';
   createPostArea.style.transform = 'translateY(100vh)';
+  videoPlayer.style.display = 'none';
+  imagePickerDiv.style.display = 'none';
+  canvas.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
