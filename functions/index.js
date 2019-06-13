@@ -3,6 +3,9 @@ const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
 const webPush = require('web-push');
 
+// firebase functions:config:set email.address="me@work.com" vapid.private_key="abcde..."
+// firebase functions:config:get
+
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
@@ -27,9 +30,9 @@ exports.storePostData = functions.https.onRequest((request, response) => {
       .then(() => {
         console.log('Setting up webPush');
         webPush.setVapidDetails(
-          'mailto:' + process.env.EMAIL_ADDRESS,
+          'mailto:' + functions.config().email.address,
           'BJn3uuGP9D0zjr8IimACunVvr5RPTJsbbWF0XDraEDN1YXfcMEiXpzt--ReYeEGd1sANuM2zHooASS0ieZ-0fTs',
-          process.env.VAPID_PRIVATE_KEY
+          functions.config().vapid.private_key
         );
         return admin
           .database()
