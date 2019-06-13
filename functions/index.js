@@ -27,9 +27,9 @@ exports.storePostData = functions.https.onRequest((request, response) => {
       .then(() => {
         console.log('Setting up webPush');
         webPush.setVapidDetails(
-          'mailto:jarrod.kallis@gmail.com',
+          'mailto:' + process.env.EMAIL_ADDRESS,
           'BJn3uuGP9D0zjr8IimACunVvr5RPTJsbbWF0XDraEDN1YXfcMEiXpzt--ReYeEGd1sANuM2zHooASS0ieZ-0fTs',
-          'WXKFTcd3ZNU-GaxhODGhZ4Xy-JuyH7RQ4MN9yYdxiKc'
+          process.env.VAPID_PRIVATE_KEY
         );
         return admin
           .database()
