@@ -234,12 +234,10 @@ self.addEventListener('sync', event => {
       readData('sync-posts').then(posts => {
         for (let post of posts) {
           console.log(post);
+          const postData = new FormData();
+
           fetch(POST_POSTS_URL, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
-            },
             body: JSON.stringify({
               ...post
             })
