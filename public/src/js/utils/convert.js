@@ -13,7 +13,7 @@ const urlBase64ToUint8Array = base64String => {
   return outputArray;
 };
 
-function dataURItoBlob(dataURI) {
+const dataURItoBlob = dataURI => {
   const byteString = atob(dataURI.split(',')[1]);
   const mimeString = dataURI
     .split(',')[0]
@@ -26,4 +26,4 @@ function dataURItoBlob(dataURI) {
   }
   const blob = new Blob([ab], { type: mimeString });
   return blob;
-}
+};

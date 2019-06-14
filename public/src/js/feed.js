@@ -224,15 +224,15 @@ if ('indexedDB' in window) {
 // }, 3000);
 
 function sendData(post) {
+  const postData = new FormData();
+  postData.append('id', post.id);
+  postData.append('title', post.title);
+  postData.append('location', post.location);
+  postData.append('file', post.picture, post.id + '.png');
+
   fetch(POST_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    body: JSON.stringify({
-      ...post
-    })
+    body: postData
   })
     .then(response => {
       return response.json();
@@ -247,8 +247,6 @@ form.addEventListener('submit', event => {
 
   const title = titleElement.value.trim();
   const location = locationElement.value.trim();
-  const image =
-    'https://firebasestorage.googleapis.com/v0/b/pwagram-b7912.appspot.com/o/sf-boat.jpg?alt=media&token=d81fc4fa-08c3-4d9f-b5dd-331b7105f0ef';
 
   if (title === '' || location === '') {
     alert('Invalid data');
@@ -261,7 +259,7 @@ form.addEventListener('submit', event => {
     id: new Date().toISOString(),
     title,
     location,
-    image
+    picture
   };
 
   if ('serviceWorker' in navigator && 'SyncManager' in window) {

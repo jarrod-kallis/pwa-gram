@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils/db.js');
 
-const CACHE_STATIC = 'static-v44';
-const CACHE_DYNAMIC = 'dynamic-v21';
+const CACHE_STATIC = 'static-v46';
+const CACHE_DYNAMIC = 'dynamic-v23';
 const MAX_CACHE_ITEMS = 100;
 
 const GET_POSTS_URL = 'https://pwagram-b7912.firebaseio.com/posts';
@@ -13,6 +13,8 @@ const STATIC_FILES = [
   // '/',
   '/index.html',
   '/offline.html',
+  '/src/js/utils/convert.js',
+  '/src/js/utils/db.js',
   '/src/js/app.js',
   '/src/js/feed.js',
   '/src/js/idb.js',
@@ -235,12 +237,14 @@ self.addEventListener('sync', event => {
         for (let post of posts) {
           console.log(post);
           const postData = new FormData();
+          postData.append('id', post.id);
+          postData.append('title', post.title);
+          postData.append('location', post.location);
+          postData.append('file', post.picture, post.id + '.png');
 
           fetch(POST_POSTS_URL, {
             method: 'POST',
-            body: JSON.stringify({
-              ...post
-            })
+            body: postData
           })
             .then(response => {
               console.log(response);
