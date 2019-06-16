@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils/db.js');
 
-const CACHE_STATIC = 'static-v47';
+const CACHE_STATIC = 'static-v54';
 const CACHE_DYNAMIC = 'dynamic-v23';
 const MAX_CACHE_ITEMS = 100;
 
@@ -241,6 +241,7 @@ self.addEventListener('sync', event => {
           postData.append('title', post.title);
           postData.append('location', post.location);
           postData.append('file', post.picture, post.id + '.png');
+          postData.append('locationCoordinates', post.locationCoordinates);
 
           fetch(POST_POSTS_URL, {
             method: 'POST',

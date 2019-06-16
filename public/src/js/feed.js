@@ -16,6 +16,47 @@ var imagePicker = document.querySelector('#image-picker');
 var imagePickerDiv = document.querySelector('#pick-image');
 let picture = null;
 
+var locationBtn = document.querySelector('#location-btn');
+var locationLoader = document.querySelector('#location-loader');
+var locationPosition = { lat: null, lng: null };
+
+locationBtn.addEventListener('click', () => {
+  console.log('Click Location Button');
+  locationBtn.style.display = 'none';
+  locationLoader.style.display = 'block';
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      locationBtn.style.display = 'inline-block';
+      locationLoader.style.display = 'none';
+
+      locationPosition.lat = position.coords.latitude;
+      locationPosition.lng = position.coords.longitude;
+
+      locationElement.value = 'Not In Munich';
+      document.querySelector('#manual-location').classList.add('is-focused');
+
+      console.log(position);
+    },
+    error => {
+      locationBtn.style.display = 'inline-block';
+      locationLoader.style.display = 'none';
+      locationPosition = { lat: null, lng: null };
+
+      console.error('No location for you: ', error);
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+});
+
+function initialiseLocation() {
+  // locationLoader.style.display = 'none';
+
+  if (!'geolocation' in navigator) {
+    locationBtn.style.display = 'none';
+  }
+}
+
 function initialiseMedia() {
   if (!('mediaDevices' in navigator)) {
     navigator.mediaDevices = {};
@@ -55,7 +96,7 @@ captureButton.addEventListener('click', event => {
 
   canvas.style.display = 'block';
   videoPlayer.style.display = 'none';
-  captureButton.style.display = 'none';
+  // captureButton.style.display = 'none';
 
   const context = canvas.getContext('2d');
   context.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
@@ -84,6 +125,7 @@ function openCreatePostModal() {
   // createPostArea.style.display = 'block';
   createPostArea.style.transform = 'translateY(0)';
   initialiseMedia();
+  initialiseLocation();
 
   // if (deferredPrompt) {
   //   deferredPrompt.prompt();
@@ -116,6 +158,8 @@ function closeCreatePostModal() {
   videoPlayer.style.display = 'none';
   imagePickerDiv.style.display = 'none';
   canvas.style.display = 'none';
+  locationBtn.style.display = 'inline';
+  locationLoader.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -233,6 +277,7 @@ function sendData(post) {
   postData.append('title', post.title);
   postData.append('location', post.location);
   postData.append('file', post.picture, post.id + '.png');
+  postData.append('locationCoordinates', post.locationCoordinates);
 
   fetch(POST_URL, {
     method: 'POST',
@@ -263,7 +308,8 @@ form.addEventListener('submit', event => {
     id: new Date().toISOString(),
     title,
     location,
-    picture
+    picture,
+    locationCoordinates: JSON.stringify(locationPosition)
   };
 
   if ('serviceWorker' in navigator && 'SyncManager' in window) {

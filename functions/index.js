@@ -58,6 +58,7 @@ exports.storePostData = functions.https.onRequest((request, response) => {
         encoding,
         mimetype
       ) => {
+        // console.log(fieldname, ':', val);
         fields[fieldname] = val;
       }
     );
@@ -85,6 +86,7 @@ exports.storePostData = functions.https.onRequest((request, response) => {
                 id: fields.id,
                 title: fields.title,
                 location: fields.location,
+                locationCoordinates: JSON.parse(fields.locationCoordinates),
                 image:
                   'https://firebasestorage.googleapis.com/v0/b/' +
                   bucket.name +
