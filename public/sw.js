@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils/db.js');
 
-const CACHE_STATIC = 'static-v54';
+const CACHE_STATIC = 'static-v57';
 const CACHE_DYNAMIC = 'dynamic-v23';
 const MAX_CACHE_ITEMS = 100;
 

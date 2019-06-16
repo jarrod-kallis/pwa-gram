@@ -43,6 +43,7 @@ locationBtn.addEventListener('click', () => {
       locationLoader.style.display = 'none';
       locationPosition = { lat: null, lng: null };
 
+      alert('Unable to retrieve GPS coordinates');
       console.error('No location for you: ', error);
     },
     { timeout: 10000, enableHighAccuracy: true }
@@ -96,7 +97,7 @@ captureButton.addEventListener('click', event => {
 
   canvas.style.display = 'block';
   videoPlayer.style.display = 'none';
-  // captureButton.style.display = 'none';
+  captureButton.style.display = 'none';
 
   const context = canvas.getContext('2d');
   context.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
@@ -160,6 +161,13 @@ function closeCreatePostModal() {
   canvas.style.display = 'none';
   locationBtn.style.display = 'inline';
   locationLoader.style.display = 'none';
+  captureButton.style.display = 'inline';
+
+  if (videoPlayer.srcObject) {
+    videoPlayer.srcObject.getVideoTracks().forEach(track => {
+      track.stop();
+    });
+  }
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
